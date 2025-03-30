@@ -6,13 +6,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription - GamingPlanet</title>
-    <link rel="icon" href="photo/7553408.jpg" type="image/x-icon">
+     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         /* Arrière-plan avec effet néon */
         body {
-            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
+          background: linear-gradient(135deg,rgb(6, 22, 85),rgb(90, 24, 156));
             background-attachment: fixed;
             color: white;
             font-family: Arial, sans-serif;
@@ -31,7 +31,6 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            background: url('https://i.imgur.com/dM7Thhn.jpg') no-repeat center center/cover;
             opacity: 0.4;
             z-index: -1;
         }
@@ -55,7 +54,7 @@
             background-clip: text;
             color: transparent;
             font-weight: bold;
-            font-size: 28px;
+            font-size:35px;
         }
 
         /* Champs de saisie avec effet lumineux */

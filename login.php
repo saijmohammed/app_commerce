@@ -6,152 +6,156 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - GamingPlanet</title>
-    <link rel="icon" href="photo/7553408.jpg" type="image/x-icon">
+   
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
-        /* Arrière-plan avec couleurs et effet néon */
-        body {
-            background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460);
-            background-attachment: fixed;
-            color: white;
-            font-family: Arial, sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            position: relative;
-        }
+      body {
+    background: linear-gradient(135deg,rgb(6, 22, 85),rgb(90, 24, 156));
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Poppins', sans-serif;
+}
 
-        /* Effet de néon en arrière-plan */
-        body::before {
-            content: "";
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: url('https://i.imgur.com/dM7Thhn.jpg') no-repeat center center/cover;
-            opacity: 0.4; /* Opacité pour éviter trop de contraste */
-            z-index: -1;
-        }
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
 
-        /* Formulaire en mode "Glassmorphism" */
-        .login-container {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.2);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-        }
+.card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    box-shadow: 0px 10px 30px rgba(180, 65, 65, 0.3);
+    padding: 30px;
+    max-width: 400px;
+    width: 100%;
+    color: white;
+    text-align: center;
+}
 
-        /* Effet de titre en dégradé */
-        .gradient-title {
-            background: linear-gradient(90deg, #ff00ff, #00ffff, #ffcc00);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-weight: bold;
-            font-size: 28px;
-        }
+.gradient-title {
+    background-image: linear-gradient(to right,rgb(63, 160, 79), #2BD2FF, #2BFF88);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: bold;
+}
 
-        /* Champs de saisie avec bord lumineux */
-        .form-control {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            border-radius: 5px;
-        }
+.form-label {
+    color: white;
+    font-weight: 500;
+}
 
-        .form-control:focus {
-            border: 2px solid #ff00ff;
-            background: rgba(255, 255, 255, 0.3);
-            color: white;
-            box-shadow: none;
-        }
+.form-control {
+    background: rgba(94, 17, 17, 0.2);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    padding: 12px;
+}
 
-        /* Bouton lumineux */
-        .btn-login {
-            background: linear-gradient(90deg,rgb(0, 255, 200),rgb(153, 0, 255));
-            border: none;
-            color: white;
-            font-weight: bold;
-            padding: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
 
-        .btn-login:hover {
-            background: linear-gradient(90deg, #00ffff,rgb(255, 0, 0));
-            transform: scale(1.05);
-        }
+.btn-primary {
+    background: linear-gradient(to right,rgb(112, 79, 87), #FF4B2B);
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 25px;
+    transition: 0.3s;
+}
 
-        /* Liens */
-        .link {
-            color: #00ffff;
-            text-decoration: none;
-        }
+.btn-primary:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
 
-        .link:hover {
-            text-decoration: underline;
-        }
+.text-center a {
+    color: #FF8C00;
+    font-weight: 500;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.text-center a:hover {
+    text-decoration: underline;
+}
+
     </style>
 </head>
 
-<body>
+<body class="bg-light d-flex align-items-center justify-content-center min-vh-100">
+    <div class="container">
+        <div class="card mx-auto p-4 custom-form">
+            <div class="card-body">
+            <?php
+session_start();
+include("conn.php");
 
-    <div class="login-container">
-        <h1 class="gradient-title">CONNEXION</h1>
-        <?php
-        session_start();
-        include("conn.php");
-        if (isset($_POST['submit'])) {
-            $email = mysqli_real_escape_string($conn, $_POST['email']);
-            $password = mysqli_real_escape_string($conn, $_POST['password']);
+if (isset($_POST['submit'])) {
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $password = $_POST['password']; // Ne pas échapper ici car password_verify n'utilise pas SQL
 
-            $result = mysqli_query($conn, "SELECT * FROM users WHERE Email='$email'") or die(mysqli_error($conn));
-            $row = mysqli_fetch_assoc($result);
+    // Vérifier si l'utilisateur existe
+    $result = mysqli_query($conn, "SELECT * FROM users WHERE email='$email'") or die(mysqli_error($conn));
+    $row = mysqli_fetch_assoc($result);
 
-            if ($row && password_verify($password, $row['motDePasse'])) {
-                $_SESSION['id'] = $row['Id'];
-                $_SESSION['email'] = $row['Email'];
-                $_SESSION['type'] = $row['type'];
+    if ($row) { 
+        $motDePass = $row['motDePasse']; // Mot de passe haché depuis la base de données
+        // Comparer le mot de passe saisi avec le haché
+        if (password_verify($password, $motDePass)) {
+            $_SESSION['id'] = $row['id'];
+            $_SESSION['email'] = $row['email'];
+            $_SESSION['type'] = $row['type']; 
 
-                if ($row['type'] === 'admin') {
-                    header("Location: admin_page.php");
-                } else {
-                    header("Location: home.php");
-                }
-                exit();
+            // Redirection selon le type d'utilisateur
+            if ($row['type'] === 'admin') {
+                header("Location: admin_page.php");
             } else {
-                echo "<div class='alert alert-danger'>Adresse e-mail ou mot de passe incorrect</div>";
+                header("Location: home.php");
             }
+            exit();
+        } else {
+            echo "<div class='alert alert-danger'>
+                    <p>Adresse e-mail ou mot de passe incorrect</p>
+                  </div>";
         }
-        ?>
+    } else {
+        echo "<div class='alert alert-danger'>
+                <p>Adresse e-mail ou mot de passe incorrect</p>
+              </div>";
+    }
+}
+?>
 
-        <form action="" method="post">
-            <div class="mb-3">
-                <input type="text" name="email" class="form-control" placeholder="Email" required>
-            </div>
-            <div class="mb-3">
-                <input type="password" name="password" class="form-control" placeholder="Mot de passe" required>
-            </div>
+                <h1 class="card-title text-center mb-4 gradient-title">CONNEXION</h1>
+                <form action="" method="post">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="text" name="email" id="email" class="form-control" autocomplete="off" required>
+                    </div>
 
-            <button type="submit" class="btn btn-login w-100" name="submit">Connexion</button>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mot de passe</label>
+                        <input type="password" name="password" id="password" class="form-control" autocomplete="off" required>
+                    </div>
 
-            <div class="mt-3">
-                <a href="#" class="link">Mot de passe oublié ?</a>
+                    <div class="mb-3 text-center">
+                        <button type="submit" class="btn btn-primary btn-lg" name="submit">connexion</button>
+                    </div>
+                    <div class="text-center">
+                        Pas encore de compte ? <a href="inscription.php">Inscrivez-vous</a>
+                    </div>
+                </form>
             </div>
-            <div class="mt-2">
-                Pas encore de compte ? <a href="inscription.php" class="link">Inscrivez-vous</a>
-            </div>
-        </form>
+        </div>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 </body>
 
