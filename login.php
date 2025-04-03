@@ -152,6 +152,9 @@ if (isset($_POST['submit'])) {
                     <div class="text-center">
                         Pas encore de compte ? <a href="inscription.php">Inscrivez-vous</a>
                     </div>
+                    <div class="text-center mt-3">
+                        <a href="reset_password.php">Mot de passe oublié ?</a>
+                    </div>
                 </form>
             </div>
         </div>
