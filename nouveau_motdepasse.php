@@ -1,17 +1,31 @@
 <?php
 session_start();
+require 'conn.php';
 $message = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $code = $_POST['code'];
+    $new_pass = $_POST['new_password'];
+    $confirm_pass = $_POST['confirm_password'];
 
-    if (!isset($_SESSION['reset_code']) || time() > $_SESSION['code_expiry']) {
-        $message = "Code expiré ou invalide.";
-    } elseif ($code == $_SESSION['reset_code']) {
-        header("Location: nouveau_motdepasse.php");
-        exit;
+    if (!isset($_SESSION['reset_email'])) {
+        $message = "Accès non autorisé.";
+    } elseif ($new_pass !== $confirm_pass) {
+        $message = "Les mots de passe ne correspondent pas.";
     } else {
-        $message = "Code incorrect.";
+        $email = $_SESSION['reset_email'];
+        $hashed_pass = password_hash($new_pass, PASSWORD_DEFAULT);
+        $stmt = $conn->prepare("UPDATE users SET motDePasse=? WHERE email=?");
+        $stmt->bind_param("ss", $hashed_pass, $email);
+        $stmt->execute();
+
+        session_unset();
+        session_destroy();
+
+        $message = "✅ Mot de passe réinitialisé avec succès.";
+
+        // Redirection vers la page login.php après une modification réussie
+        header("Location: login.php");
+        exit; // Assurez-vous que le script s'arrête ici après la redirection
     }
 }
 ?>
@@ -20,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Vérifier le code</title>
+    <title>Nouveau mot de passe</title>
     <style>
         * {
             box-sizing: border-box;
@@ -46,13 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         h3 {
             text-align: center;
-            background: linear-gradient(to right, #00f260, #0575e6);
+            background: linear-gradient(to right, #00c6ff, #0072ff);
             -webkit-background-clip: text;
             color: transparent;
-            font-size: 1.7em;
+            font-size: 1.5em;
             margin-bottom: 1.5rem;
         }
-        input[type="text"] {
+        input[type="password"] {
             background: rgba(255, 255, 255, 0.15);
             border: none;
             border-radius: 10px;
@@ -79,11 +93,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: pointer;
         }
         .alert {
-            background-color: rgba(255, 0, 0, 0.3);
+            background-color: rgba(0, 128, 255, 0.2);
             padding: 10px;
             border-radius: 8px;
             margin-bottom: 1rem;
             text-align: center;
+            color: white;
         }
         .back-btn {
             width: 100%;
@@ -94,6 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: white;
             font-size: 1rem;
             margin-top: 10px;
+            text-align: center;
             cursor: pointer;
         }
         .back-btn:hover {
@@ -103,16 +119,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <form method="post" class="card">
-        <h3>📩 Vérification du code</h3>
+        <h3>🔑 Nouveau mot de passe</h3>
         <?php if (!empty($message)): ?>
             <div class="alert"><?= $message ?></div>
         <?php endif; ?>
-        <input type="text" name="code" placeholder="Entrez le code reçu" required>
-        <button type="submit">Vérifier</button>
-        
-        <!-- Bouton retour vers la page login.php -->
+        <input type="password" name="new_password" placeholder="Nouveau mot de passe" required>
+        <input type="password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
+        <button type="submit">Réinitialiser</button>
+
+        <!-- Bouton retour vers la page verifier_code.php -->
         <a href="login.php">
-            <button type="button" class="back-btn">Retour</button>
+            <button type="button" class="back-btn">Retour </button>
         </a>
     </form>
 </body>
