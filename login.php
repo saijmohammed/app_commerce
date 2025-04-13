@@ -117,9 +117,12 @@ if (isset($_POST['submit'])) {
             // Redirection selon le type d'utilisateur
             if ($row['type'] === 'admin') {
                 header("Location: admin_page.php");
-            } else {
+          
+              }elseif($row['type'] === 'vendeur'){
+                header("Location: vendeur_page.php");
+             } else {
                 header("Location: home.php");
-            }
+             }
             exit();
         } else {
             echo "<div class='alert alert-danger'>
