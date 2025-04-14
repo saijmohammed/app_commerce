@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->Subject = "Code de verification";
             $mail->Body = "
                 <div style='font-family: Arial; background: #f9f9f9; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto;'>
-                    <h2 style='color: #5D3FD3; text-align: center;'>🔐 Vérification de votre compte</h2>
+                    <h2 style='color: #5D3FD3; text-align: center;'>🔐 Verification de votre compte</h2>
                     <p>Bonjour,</p>
                     <p>Voici votre code de vérification :</p>
                     <div style='background-color: #5D3FD3; color: white; font-size: 24px; padding: 15px; text-align: center; border-radius: 6px; margin: 20px 0;'>$code</div>
