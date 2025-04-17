@@ -1,3 +1,47 @@
+<?php
+session_start();
+include("conn.php");
+
+if (isset($_POST['submit'])) {
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $password = $_POST['password']; // Ne pas échapper ici car password_verify n'utilise pas SQL
+
+    // Vérifier si l'utilisateur existe
+    $result = mysqli_query($conn, "SELECT * FROM users WHERE email='$email'") or die(mysqli_error($conn));
+    $row = mysqli_fetch_assoc($result);
+
+    if ($row) { 
+        $motDePass = $row['motDePasse']; // Mot de passe haché depuis la base de données
+        // Comparer le mot de passe saisi avec le haché
+        if (password_verify($password, $motDePass)) {
+            $_SESSION['id'] = $row['id'];
+            $_SESSION['email'] = $row['email'];
+            $_SESSION['type'] = $row['type']; 
+
+            // Redirection selon le type d'utilisateur
+            if ($row['type'] === 'admin') {
+                header("Location: admin_page.php");
+            } elseif ($row['type'] === 'vendeur') {
+                header("Location: vendeur_page.php");
+            } elseif ($row['type'] === 'fournisseur') {
+                $_SESSION['fournisseur_id'] = $row['id']; // Ajoutez cette ligne pour définir la session du fournisseur
+                header("Location: fournisseur.php");
+            } else {
+                header("Location: home.php");
+            }
+            exit();
+        } else {
+            echo "<div class='alert alert-danger'>
+                    <p>Adresse e-mail ou mot de passe incorrect</p>
+                  </div>";
+        }
+    } else {
+        echo "<div class='alert alert-danger'>
+                <p>Adresse e-mail ou mot de passe incorrect</p>
+              </div>";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -117,9 +161,10 @@ if (isset($_POST['submit'])) {
             // Redirection selon le type d'utilisateur
             if ($row['type'] === 'admin') {
                 header("Location: admin_page.php");
-          
-              }elseif($row['type'] === 'vendeur'){
+           }elseif($row['type'] === 'vendeur'){
                 header("Location: vendeur_page.php");
+            }elseif($row['type'] === 'fournisseur'){
+                header("Location: fournisseur.php");
              } else {
                 header("Location: home.php");
              }
