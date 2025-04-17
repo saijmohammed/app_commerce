@@ -4,20 +4,20 @@ require_once('conn.php');
 $message = ''; // pour afficher le message plus tard
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
-    $product_id = mysqli_real_escape_string($conn, $_POST['product_id']);
+    $product_id = mysqli_real_escape_string($conn, $_POST['id']);
 
-    $product_name = mysqli_real_escape_string($conn, $_POST['product_name']);
-    $price = $_POST['price'];
-    $quantitate = $_POST['quantitate'];
-    $description = mysqli_real_escape_string($conn, $_POST['description']);
-    $category = mysqli_real_escape_string($conn, $_POST['category']);
+    $nom = mysqli_real_escape_string($conn, $_POST['nom']);
+    $prix = $_POST['prix'];
+    $quantite = $_POST['quantite'];
+    $details = mysqli_real_escape_string($conn, $_POST['details']);
+    $categorie = mysqli_real_escape_string($conn, $_POST['categorie']);
 
     $update_query = "UPDATE products SET
-        product_name = '$product_name',
-        price = '$price',
-        quantitate = '$quantitate',
-        description = '$description',
-        categories = '$category'
+        nom = '$nom',
+        prix = '$prix',
+        quantite = '$quantite',
+        details = '$details',
+        categorie = '$categorie'
         WHERE id = '$product_id'";
     $update_result = mysqli_query($conn, $update_query);
 
@@ -28,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
     }
 }
 
-// On récupère les données du produit (toujours)
 $product_id = '';
 $row = null;
 
@@ -151,20 +150,20 @@ if (isset($_GET['id']) || isset($_POST['product_id'])) {
         <form action="" method="post">
             <input type="hidden" name="product_id" value="<?= $row['id']; ?>">
 
-            <label for="product_name">Nom du Produit :</label>
-            <input type="text" name="product_name" value="<?= htmlspecialchars($row['product_name']); ?>" required>
+            <label for="nom">Nom du Produit :</label>
+            <input type="text" name="nom" value="<?= htmlspecialchars($row['nom']); ?>" required>
 
-            <label for="price">Prix :</label>
-            <input type="number" min="0" name="price" value="<?= $row['price']; ?>" required>
+            <label for="prix">Prix :</label>
+            <input type="number" min="0" name="prix" value="<?= $row['prix']; ?>" required>
 
-            <label for="quantitate">Quantité :</label>
-            <input type="number" min="0" name="quantitate" value="<?= $row['quantitate']; ?>" required>
+            <label for="quantite">Quantité :</label>
+            <input type="number" min="0" name="quantite" value="<?= $row['quantite']; ?>" required>
 
-            <label for="description">Description :</label>
-            <textarea name="description" required><?= htmlspecialchars($row['description']); ?></textarea>
+            <label for="details">Description :</label>
+            <textarea name="details" required><?= htmlspecialchars($row['details']); ?></textarea>
 
-            <label for="category">Catégorie :</label>
-            <input type="text" name="category" value="<?= htmlspecialchars($row['categories']); ?>" required>
+            <label for="categorie">Catégorie :</label>
+            <input type="text" name="categorie" value="<?= htmlspecialchars($row['categorie']); ?>" required>
 
             <input type="submit" name="update_product" value="💾 Enregistrer les modifications">
             <a href="admin_produits.php" class="btn-retour">← Retour à la liste des produits</a>

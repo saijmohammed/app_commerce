@@ -22,10 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         session_destroy();
 
         $message = "✅ Mot de passe réinitialisé avec succès.";
-
-        // Redirection vers la page login.php après une modification réussie
         header("Location: login.php");
-        exit; // Assurez-vous que le script s'arrête ici après la redirection
+        exit;
     }
 }
 ?>
@@ -34,103 +32,116 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Nouveau mot de passe</title>
+    <title>Réinitialiser mot de passe</title>
     <style>
         * {
             box-sizing: border-box;
         }
+
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, rgb(6, 22, 85), rgb(90, 24, 156));
+            background: linear-gradient(135deg, #05365f, #ff4d88);
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
         }
+
         .card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(12px);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
             padding: 30px;
+            max-width: 340px;
             width: 100%;
-            max-width: 400px;
-            color: #fff;
+            color: white;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
+
         h3 {
             text-align: center;
-            background: linear-gradient(to right, #00c6ff, #0072ff);
+            background-image: linear-gradient(to right, #ff9f00, #ff4d88);
             -webkit-background-clip: text;
+            background-clip: text;
             color: transparent;
-            font-size: 1.5em;
+            font-size: 28px;
             margin-bottom: 1.5rem;
         }
+
         input[type="password"] {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.1);
             border: none;
             border-radius: 10px;
             padding: 12px;
             width: 100%;
-            color: #fff;
+            color: white;
             margin-bottom: 1rem;
+            font-size: 14px;
         }
+
         input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.6);
         }
+
         button {
             width: 100%;
             padding: 12px;
             border: none;
             border-radius: 25px;
-            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            background: linear-gradient(to right, #ff9f00, #ff4d88);
             color: white;
-            font-size: 1rem;
-            transition: transform 0.2s ease;
+            font-size: 15px;
+            font-weight: 500;
+            transition: 0.3s;
+            margin-bottom: 10px;
         }
+
         button:hover {
+            opacity: 0.9;
             transform: scale(1.05);
             cursor: pointer;
         }
+
         .alert {
-            background-color: rgba(0, 128, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.15);
             padding: 10px;
             border-radius: 8px;
             margin-bottom: 1rem;
             text-align: center;
-            color: white;
+            color: #ffcccc;
+            font-size: 14px;
         }
-        .back-btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 25px;
-            background: linear-gradient(to right, #8e44ad, #9b59b6);
-            color: white;
-            font-size: 1rem;
-            margin-top: 10px;
+
+        a {
+            display: block;
             text-align: center;
-            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+            text-decoration: none;
+            color: #ffcc00;
+            transition: 0.3s;
         }
-        .back-btn:hover {
-            transform: scale(1.05);
+
+        a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <form method="post" class="card">
-        <h3>🔑 Nouveau mot de passe</h3>
+        <h3>🔐 Réinitialiser</h3>
+
         <?php if (!empty($message)): ?>
             <div class="alert"><?= $message ?></div>
         <?php endif; ?>
+
         <input type="password" name="new_password" placeholder="Nouveau mot de passe" required>
         <input type="password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
+
         <button type="submit">Réinitialiser</button>
 
-        <!-- Bouton retour vers la page verifier_code.php -->
-        <a href="login.php">
-            <button type="button" class="back-btn">Retour </button>
-        </a>
+        <a href="login.php">⬅ Retour à la connexion</a>
     </form>
 </body>
 </html>
