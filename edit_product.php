@@ -4,7 +4,7 @@ require_once('conn.php');
 $message = ''; // pour afficher le message plus tard
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
-    $product_id = mysqli_real_escape_string($conn, $_POST['id']);
+    $product_id = mysqli_real_escape_string($conn, $_POST['product_id']);
 
     $nom = mysqli_real_escape_string($conn, $_POST['nom']);
     $prix = $_POST['prix'];
@@ -12,13 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_product'])) {
     $details = mysqli_real_escape_string($conn, $_POST['details']);
     $categorie = mysqli_real_escape_string($conn, $_POST['categorie']);
 
-    $update_query = "UPDATE products SET
+    $update_query = "UPDATE produits SET
         nom = '$nom',
         prix = '$prix',
-        quantite = '$quantite',
-        details = '$details',
-        categorie = '$categorie'
+        quantite_stock = '$quantite',
+        categorie = '$categorie',
+        description = '$details'
         WHERE id = '$product_id'";
+
     $update_result = mysqli_query($conn, $update_query);
 
     if ($update_result) {
@@ -33,7 +34,7 @@ $row = null;
 
 if (isset($_GET['id']) || isset($_POST['product_id'])) {
     $product_id = isset($_GET['id']) ? mysqli_real_escape_string($conn, $_GET['id']) : mysqli_real_escape_string($conn, $_POST['product_id']);
-    $query = "SELECT * FROM products WHERE id = '$product_id'";
+    $query = "SELECT * FROM produits WHERE id = '$product_id'";
     $result = mysqli_query($conn, $query);
     if ($result && $result->num_rows > 0) {
         $row = mysqli_fetch_assoc($result);
@@ -42,6 +43,7 @@ if (isset($_GET['id']) || isset($_POST['product_id'])) {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -68,7 +70,7 @@ if (isset($_GET['id']) || isset($_POST['product_id'])) {
 
         h1 {
             text-align: center;
-            color: #2c3e50;
+            color:rgb(79, 129, 179);
             margin-bottom: 20px;
         }
 
@@ -157,10 +159,10 @@ if (isset($_GET['id']) || isset($_POST['product_id'])) {
             <input type="number" min="0" name="prix" value="<?= $row['prix']; ?>" required>
 
             <label for="quantite">Quantité :</label>
-            <input type="number" min="0" name="quantite" value="<?= $row['quantite']; ?>" required>
+            <input type="number" min="0" name="quantite" value="<?= $row['quantite_stock']; ?>" required>
 
             <label for="details">Description :</label>
-            <textarea name="details" required><?= htmlspecialchars($row['details']); ?></textarea>
+            <textarea name="details" required><?= htmlspecialchars($row['description']); ?></textarea>
 
             <label for="categorie">Catégorie :</label>
             <input type="text" name="categorie" value="<?= htmlspecialchars($row['categorie']); ?>" required>
