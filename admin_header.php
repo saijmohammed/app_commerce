@@ -7,12 +7,70 @@ if(isset($message)){
          <i class="fas fa-times" onclick="this.parentElement.remove();"></i>
       </div>
       ';
+      
    }
 }
+$_SESSION['admin_name'] = $_SESSION['admin_name'] ?? 'Admin';
+$admin_name = htmlspecialchars($_SESSION['admin_name']);
 ?>
 <html>
  
 <link rel="stylesheet" href="admin_page.css">
+<style>
+.profile {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .profile-btn:hover {
+            color: #2ecc71;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: #333;
+            border-radius: 6px;
+            min-width: 150px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .dropdown a {
+            padding: 10px 15px;
+            color: white;
+            text-decoration: none;
+            display: block;
+            transition: background 0.3s;
+        }
+
+        .dropdown a:hover {
+            background-color: #444;
+        }
+
+        .profile:hover .dropdown {
+            display: flex;
+        }
+
+
+
+
+
+</style>
 <header class="header">
     <div class="flex">
         <a href="admin_page.php" class="logo">
@@ -65,14 +123,21 @@ if(isset($message)){
                 </svg>
                 Messages
             </a>
-            <a href="logout.php">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-log-out">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
+            
+            <div class="profile">
+            <button class="profile-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user">
+                    <circle cx="12" cy="7" r="4"/>
+                    <path d="M5.5 20a6.5 6.5 0 0113 0"/>
                 </svg>
-                Déconnexion
-            </a>
+                <?php echo $admin_name; ?>
+            </button>
+            <div class="dropdown">
+                <a href="admin_profil.php">Mon compte</a>
+
+                <a href="logout.php">Déconnexion</a>
+            </div>
+        </div>
         </nav>
     </div>
 </header>
