@@ -4,7 +4,7 @@ require_once('conn.php');
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id'])) {
     $product_id = mysqli_real_escape_string($conn, $_GET['id']);
 
-    $query = "DELETE FROM products WHERE id = '$product_id'";
+    $query = "DELETE FROM produits WHERE id = '$product_id'";
     $result = mysqli_query($conn, $query);
 
     echo '<!DOCTYPE html>
