@@ -1,145 +1,135 @@
 <?php
 session_start();
-
-// Vérifie si l'utilisateur est connecté
-if (isset($_SESSION['admin_name']) && isset($_SESSION['admin_email']) && isset($_SESSION['admin_phone'])) {
-    $admin_name = htmlspecialchars($_SESSION['admin_name']);
-    $admin_email = htmlspecialchars($_SESSION['admin_email']);
-    $admin_phone = htmlspecialchars($_SESSION['admin_phone']);
-    $compte_connecte = true;
+ 
+if (!isset($_SESSION['email'])) {
+    header('location:login.php');
+    exit;
 } else {
-    // Si la session n'est pas active, redirige vers la page de connexion
-    $compte_connecte = false;
-}
 ?>
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Mon Compte Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0; 
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #05365f, #ff4d88);  /* Fond dégradé similaire au login */
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.1); /* Carte translucide */
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(15px); /* Effet blur */
-            border-radius: 20px;
-            padding: 40px;
-            width: 90%;
-            max-width: 450px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            text-align: center;
-        }
-
-        h2 {
-            font-size: 28px;
-            margin-bottom: 25px;
-            color: #fff;
-        }
-
-        .info {
-            font-size: 16px;
-            text-align: left;
-            margin: 15px 0;
-            color: #fff;
-        }
-
-        .info strong {
-            color: #aaa;
-            width: 100px;
-            display: inline-block;
-        }
-
-        .buttons {
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .buttons a {
-            text-decoration: none;
-            padding: 12px 24px;
-            border-radius: 30px;
-            background: linear-gradient(135deg, #ff9f00, #ff4d88); /* Boutons arrondis avec gradient */
-            color: white;
-            font-weight: 600;
-            transition: transform 0.3s, box-shadow 0.3s;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .buttons a:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .logout {
-            background: linear-gradient(135deg, #ff416c, #ff4b2b); /* Bouton déconnexion */
-        }
-
-        @media (max-width: 500px) {
-            .container {
-                padding: 25px;
-            }
-
-            h2 {
-                font-size: 22px;
-            }
-
-            .buttons a {
-                padding: 10px 20px;
-                font-size: 14px;
-            }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="profil.css">
+    <link rel="icon" href="photo/7553408.jpg" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Profile - GamingPlanet</title>
 </head>
+
 <body>
+    <?php
+    require_once('conn.php');
+    $userid = $_SESSION['id'];
+    $messages = [];
 
-<div class="container">
-    <h2>Mon Compte Administrateur</h2>
-    
-    <?php if ($compte_connecte): ?>
-        <div class="info">
-            <strong>Mon compte admin connecté</strong> <!-- Affiche que le compte est connecté -->
-        </div>
-        <div class="info">
-            <strong>Email :</strong> <?php echo $admin_email; ?>
-        </div>
+    if (isset($_POST['submit'])) {
+        // Use prepared statements to prevent SQL injection
+        $newUsername = mysqli_real_escape_string($conn, $_POST['username']);
+        $newAdresse = mysqli_real_escape_string($conn, $_POST['adresse']);
+        $newPhoneNumber = mysqli_real_escape_string($conn, $_POST['numero_telephone']);
+        $newEmail = mysqli_real_escape_string($conn, $_POST['email']);
 
-        <div class="info">
-            <strong>Nom :</strong> <?php echo $admin_name; ?>
-        </div>
+        $updateQuery = "UPDATE users SET 
+                        username=?, 
+                        adresse=?, 
+                        numero_telephone=?, 
+                        email=? 
+                        WHERE Id=?";
+                        
+        $stmt = mysqli_prepare($conn, $updateQuery);
+        mysqli_stmt_bind_param($stmt, 'ssssi', $newUsername, $newAdresse, $newPhoneNumber, $newEmail, $userid);
+        $result = mysqli_stmt_execute($stmt);
 
-        <div class="info">
-            <strong>Téléphone :</strong> <?php echo $admin_phone; ?>
-        </div>
+        if ($result) {
+            $_SESSION['email'] = $newEmail; // Update session with new email
+            $messages[] = 'Vos informations ont été mises à jour avec succès!';
+        } else {
+            $messages[] = 'Erreur lors de la mise à jour des informations: ' . mysqli_error($conn);
+        }
+        
+        mysqli_stmt_close($stmt);
+    }
 
-        <div class="buttons">
-            <a href="admin_page.php">← Retour</a>
-            <a href="logout.php" class="logout">Déconnexion</a>
-        </div>
-    <?php else: ?>
-        <div class="info">
-            <strong>Veuillez vous connecter pour accéder à votre compte.</strong> <!-- Message pour les utilisateurs non connectés -->
-        </div>
-    <?php endif; ?>
-</div>
+    // Retrieve user information from database using prepared statement
+    $selectQuery = "SELECT * FROM users WHERE Id = ?";
+    $stmt = mysqli_prepare($conn, $selectQuery);
+    mysqli_stmt_bind_param($stmt, 'i', $userid);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    ?>
 
+    <div class="container">
+        <?php
+        // Display messages if there are any
+        if (!empty($messages)) {
+            foreach ($messages as $message) {
+                echo '<div class="message">
+                      <span>' . $message . '</span>
+                      </div>';
+            }
+        }
+
+        if ($result && mysqli_num_rows($result) > 0) {
+            $row = mysqli_fetch_assoc($result);
+        ?>
+            <div class="profile">
+                <h1 class="gradient-title">PROFIL</h1>
+                <form action="" method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nom d'utilisateur</label>
+                        <input type="text" name="username" id="username" class="form-control" autocomplete="off" value="<?php echo htmlspecialchars($row['username']); ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" name="email" id="email" class="form-control" autocomplete="off" value="<?php echo htmlspecialchars($row['email']); ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adresse" class="form-label">Adresse</label>
+                        <input type="text" name="adresse" id="adresse" class="form-control" autocomplete="off" value="<?php echo htmlspecialchars($row['adresse']); ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="numero_telephone" class="form-label">Numéro de téléphone</label>
+                        <input type="tel" name="numero_telephone" id="numero_telephone" class="form-control" autocomplete="off" value="<?php echo htmlspecialchars($row['numero_telephone']); ?>" required>
+                    </div>
+                    
+                    <div class="mb-3 text-center">
+                        <button type="submit" class="btn btn-primary" name="submit">Mettre à jour</button>
+                    </div>
+                </form>
+                <div class="text-center">
+                    <a href="admin_page.php" class="btn btn-outline">Retour à l'accueil</a>
+                </div>
+            </div>
+        <?php
+        } else {
+            echo '<div class="message"><span>Impossible de récupérer les informations utilisateur.</span></div>';
+        }
+        mysqli_stmt_close($stmt);
+        ?>
+    </div>
+
+    <script>
+        const messages = document.querySelectorAll('.message');
+
+        const removeMessage = (message) => {
+            setTimeout(() => {
+                message.classList.add('fade-out');
+                setTimeout(() => {
+                    message.remove();
+                }, 1000);
+            }, 4000);
+        };
+
+        messages.forEach((message) => {
+            message.classList.add('show');
+            removeMessage(message);
+        });
+    </script>
 </body>
+
 </html>
+<?php
+}
+?>

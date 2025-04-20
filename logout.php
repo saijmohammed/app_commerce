@@ -1,18 +1,24 @@
 <?php
 session_start();
+include("conn.php"); // ← très important !
 
-// Supprimer les données de session
-$_SESSION = []; // Vide toutes les variables de session
+if (isset($_SESSION['id'])) {
+    $user_id = $_SESSION['id'];
+    // Mettre status à 0 pour cet utilisateur
+    mysqli_query($conn, "UPDATE users SET status = 0 WHERE id = '$user_id'");
+}
 
-// Détruire la session
+// Supprimer toutes les variables de session
+$_SESSION = [];
+session_unset();
 session_destroy();
 
-// Supprimer le cookie "remember_me" si il existe
+// Supprimer aussi le cookie "remember_me" s'il existe
 if (isset($_COOKIE['remember_me'])) {
     setcookie("remember_me", "", time() - 3600, "/"); // Le cookie expire dans le passé
 }
 
-// Rediriger l'utilisateur vers la page de connexion
+// Rediriger vers la page de connexion
 header("Location: login.php");
 exit();
 ?>

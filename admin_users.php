@@ -2,10 +2,10 @@
 include 'conn.php';
 session_start();
 
-// Processus de suppression d'utilisateur
+// Suppression d'utilisateur
 if (isset($_GET['delete'])) {
     $delete_id = mysqli_real_escape_string($conn, $_GET['delete']);
-    $delete_query = "DELETE FROM `users` WHERE Id = '$delete_id'";
+    $delete_query = "DELETE FROM `users` WHERE id = '$delete_id'";
     $delete_result = mysqli_query($conn, $delete_query);
 
     if ($delete_result) {
@@ -17,140 +17,168 @@ if (isset($_GET['delete'])) {
     }
 }
 
-// Processus de modification d'utilisateur
+// Redirection pour modification
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_user'])) {
     $edit_id = mysqli_real_escape_string($conn, $_POST['edit_user_id']);
     header("Location: edit_user.php?id=$edit_id");
     exit();
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COMPTES D’UTILISATEURS</title>
+    <title>Gestion des Utilisateurs</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="css/admin_style.css">
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f6f9;
-            color: #333;
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
         }
-
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #e0eafc, #cfdef3);
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+        .header {
+            background: linear-gradient(90deg, #141e30, #243b55);
+            color: white;
+            padding: 20px 30px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 999;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header a {
+            text-decoration: none;
+            color: #00d2ff;
+            font-weight: bold;
+            font-size: 24px;
+        }
         .users {
             padding: 20px;
+            max-width: 1200px;
+            margin: auto;
         }
-
-        .title {
+        .panel {
             text-align: center;
-            font-size: 2rem;
             margin-bottom: 30px;
-            color: #333;
         }
-
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .user-text {
+            color: #3498db;
+        }
         .box-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
         }
-
         .box {
-            width: 280px;
-            background: #fff;
-            color: #333;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            margin: 15px;
+            background: white;
+            border-radius: 12px;
             padding: 20px;
-            transition: transform 0.3s ease;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transition: 0.3s;
         }
-
         .box:hover {
             transform: translateY(-5px);
         }
-
         .box p {
-            margin: 8px 0;
+            margin: 10px 0;
             font-size: 1rem;
+            color: #555;
         }
-
+        .box p span {
+            font-weight: bold;
+            color: #111;
+        }
         .box .delete-btn,
         .box form input[type="submit"] {
-            background-color: #3498db;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            width: 100%;
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
             margin-top: 10px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
         }
-
-        .box .delete-btn:hover,
+        .box form input[type="submit"] {
+            background: #2980b9;
+            color: white;
+        }
         .box form input[type="submit"]:hover {
-            background-color: #2980b9;
+            background: #3498db;
         }
-
         .box .delete-btn {
-            background-color: #e74c3c;
-        }
-
-        .box .delete-btn:hover {
-            background-color: #c0392b;
-        }
-
-        .panel {
+            background: #c0392b;
+            color: white;
+            display: block;
             text-align: center;
-            margin-bottom: 20px;
+            text-decoration: none;
         }
-
-        .user-text {
-            color: #3498db;
+        .box .delete-btn:hover {
+            background: #e74c3c;
+        }
+        @media(max-width: 600px) {
+            .title {
+                font-size: 2rem;
+            }
+            .header {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <?php include 'admin_header.php'; ?>
 
-    <section class="users">
-        <div class="panel">
-            <h1 class="title">COMPTES <span class="user-text">D'UTILISATEURS</span></h1>
-        </div>
+<?php include 'admin_header.php'; ?>
 
-        <div class="box-container">
-            <?php
-            $select_users = mysqli_query($conn, "SELECT * FROM `users`") or die('query failed');
-            while ($fetch_users = mysqli_fetch_assoc($select_users)) {
-            ?>
-                <div class="box">
-                    <p> User ID: <span><?php echo $fetch_users['id']; ?></span> </p>
-                    <p> Username: <span><?php echo $fetch_users['username']; ?></span> </p>
-                    <p> Email: <span><?php echo $fetch_users['email']; ?></span> </p>
-                    <p> User type: <span style="color:<?php echo ($fetch_users['type'] == 'admin') ? '#e67e22' : '#3498db'; ?>"><?php echo $fetch_users['type']; ?></span> </p>
+<section class="users">
+    <div class="panel">
+        <h1 class="title">COMPTES <span class="user-text">D'UTILISATEURS</span></h1>
+    </div>
 
-                    <form method="post" action="admin_users.php">
-                        <input type="hidden" name="edit_user_id" value="<?php echo $fetch_users['id']; ?>">
-                        <input type="submit" name="edit_user" value="Modifier l'utilisateur">
-                    </form>
+    <div class="box-container">
+        <?php
+        $select_users = mysqli_query($conn, "SELECT * FROM `users`") or die('query failed');
+        while ($fetch_users = mysqli_fetch_assoc($select_users)) {
+        ?>
+            <div class="box">
+                <p> <i class="fas fa-id-badge"></i> ID: <span><?php echo $fetch_users['id']; ?></span> </p>
+                <p> <i class="fas fa-user"></i> Username: <span><?php echo $fetch_users['username']; ?></span> </p>
+                <p> <i class="fas fa-envelope"></i> Email: <span><?php echo $fetch_users['email']; ?></span> </p>
+                <p> <i class="fas fa-user-tag"></i> Type: 
+                    <span style="color:<?php echo ($fetch_users['type'] == 'admin') ? '#e67e22' : '#3498db'; ?>">
+                        <?php echo $fetch_users['type']; ?>
+                    </span>
+                </p>
 
-                    <a href="admin_users.php?delete=<?php echo $fetch_users['id']; ?>" onclick="return confirm('Supprimer cet utilisateur ?');" class="delete-btn">Supprimer l'utilisateur</a>
-                </div>
-            <?php
-            };
-            ?>
-        </div>
-    </section>
+                <form method="post" action="admin_users.php">
+                    <input type="hidden" name="edit_user_id" value="<?php echo $fetch_users['id']; ?>">
+                    <input type="submit" name="edit_user" value="Modifier l'utilisateur">
+                </form>
+
+                <a href="admin_users.php?delete=<?php echo $fetch_users['id']; ?>" onclick="return confirm('Supprimer cet utilisateur ?');" class="delete-btn">
+                    Supprimer l'utilisateur
+                </a>
+            </div>
+        <?php
+        };
+        ?>
+    </div>
+</section>
 
 </body>
-
 </html>

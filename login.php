@@ -15,6 +15,9 @@ if (isset($_COOKIE['remember_me'])) {
         $_SESSION['email'] = $row['email'];
         $_SESSION['type'] = $row['type'];
 
+        // ➔ Mettre à jour status à 1 (connecté)
+        mysqli_query($conn, "UPDATE users SET status = 1 WHERE id = '{$row['id']}'");
+
         // Redirection selon le type d'utilisateur
         if ($row['type'] === 'admin') {
             header("Location: admin_page.php");
@@ -39,20 +42,22 @@ if (isset($_POST['submit'])) {
     $row = mysqli_fetch_assoc($result);
 
     if ($row) {
-        $motDePass = $row['motDePasse']; // Mot de passe haché
-        // Comparer le mot de passe saisi avec le haché
-        if (password_verify($password, $motDePass)) {
+        $motDePasse = $row['motDePasse']; // Mot de passe haché
+        if (password_verify($password, $motDePasse)) {
             $_SESSION['id'] = $row['id'];
             $_SESSION['email'] = $row['email'];
             $_SESSION['type'] = $row['type'];
 
-            // Créer un cookie pour garder l'utilisateur connecté
+            // ➔ Mettre à jour status à 1 (connecté)
+            mysqli_query($conn, "UPDATE users SET status = 1 WHERE id = '{$row['id']}'");
+
+            // Créer un cookie "remember me" si coché
             if (isset($_POST['remember_me'])) {
-                $cookie_value = base64_encode($row['id']); // Encode l'ID de l'utilisateur
-                setcookie("remember_me", $cookie_value, time() + (86400 * 30), "/"); // Expiration après 30 jours
+                $cookie_value = base64_encode($row['id']);
+                setcookie("remember_me", $cookie_value, time() + (86400 * 30), "/"); // 30 jours
             }
 
-            // Redirection selon le type d'utilisateur
+            // Redirection selon type utilisateur
             if ($row['type'] === 'admin') {
                 header("Location: admin_page.php");
             } elseif ($row['type'] === 'vendeur') {
@@ -62,26 +67,21 @@ if (isset($_POST['submit'])) {
             }
             exit();
         } else {
-            echo "<div class='alert alert-danger'>
-                    <p>Adresse e-mail ou mot de passe incorrect</p>
-                  </div>";
+            $login_error = "Adresse e-mail ou mot de passe incorrect.";
         }
     } else {
-        echo "<div class='alert alert-danger'>
-                <p>Adresse e-mail ou mot de passe incorrect</p>
-              </div>";
+        $login_error = "Adresse e-mail ou mot de passe incorrect.";
     }
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ParfumPlanet</title>
+    <title>Connexion - ParfumPlanet</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -92,7 +92,6 @@ if (isset($_POST['submit'])) {
             align-items: center;
             font-family: 'Poppins', sans-serif;
         }
-
         .card {
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(10px);
@@ -103,7 +102,6 @@ if (isset($_POST['submit'])) {
             color: white;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
         }
-
         .gradient-title {
             background-image: linear-gradient(to right, #ff9f00, #ff4d88);
             -webkit-background-clip: text;
@@ -112,12 +110,10 @@ if (isset($_POST['submit'])) {
             font-weight: 600;
             font-size: 30px;
         }
-
         .form-label {
             color: #f8f9fa;
             font-weight: 500;
         }
-
         .form-control {
             background: rgba(255, 255, 255, 0.1);
             border: none;
@@ -126,11 +122,9 @@ if (isset($_POST['submit'])) {
             color: white;
             margin-bottom: 20px;
         }
-
         .form-control::placeholder {
             color: rgba(255, 255, 255, 0.6);
         }
-
         .btn-primary {
             background: linear-gradient(to right, #ff9f00, #ff4d88);
             border: none;
@@ -140,29 +134,25 @@ if (isset($_POST['submit'])) {
             width: 100%;
             transition: 0.3s;
         }
-
         .btn-primary:hover {
             opacity: 0.9;
             transform: scale(1.05);
         }
-
         .text-center a {
             color: #ff9f00;
             font-weight: 500;
             text-decoration: none;
             transition: 0.3s;
         }
-
         .text-center a:hover {
             text-decoration: underline;
         }
-
         .alert {
             background-color: rgba(255, 0, 0, 0.6);
             color: white;
             font-weight: 600;
+            margin-bottom: 20px;
         }
-
         .form-check-label {
             color: #f8f9fa;
         }
@@ -172,6 +162,13 @@ if (isset($_POST['submit'])) {
 <body>
     <div class="card">
         <h1 class="text-center gradient-title">Connexion</h1>
+
+        <?php if (isset($login_error)) { ?>
+            <div class="alert alert-danger">
+                <?php echo $login_error; ?>
+            </div>
+        <?php } ?>
+
         <form action="" method="post">
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
@@ -183,7 +180,6 @@ if (isset($_POST['submit'])) {
                 <input type="password" name="password" id="password" class="form-control" placeholder="Entrez votre mot de passe" autocomplete="off" required>
             </div>
 
-            <!-- Case à cocher pour se souvenir de l'utilisateur -->
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
                 <label class="form-check-label" for="remember_me">Se souvenir de moi</label>
@@ -198,7 +194,7 @@ if (isset($_POST['submit'])) {
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
