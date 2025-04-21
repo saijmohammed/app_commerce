@@ -22,7 +22,7 @@ if (isset($_COOKIE['remember_me'])) {
         if ($row['type'] === 'admin') {
             header("Location: admin_page.php");
         } elseif ($row['type'] === 'vendeur') {
-            header("Location: vendeur_page.php");
+            header("Location: vendeur_home.php");
         } else {
             header("Location: home.php");
         }
@@ -61,7 +61,7 @@ if (isset($_POST['submit'])) {
             if ($row['type'] === 'admin') {
                 header("Location: admin_page.php");
             } elseif ($row['type'] === 'vendeur') {
-                header("Location: vendeur_page.php");
+                header("Location: vendeur_home.php");
             } else {
                 header("Location: home.php");
             }
