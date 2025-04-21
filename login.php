@@ -4,41 +4,38 @@ include("conn.php");
 
 if (isset($_POST['submit'])) {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $password = $_POST['password']; // Ne pas échapper ici car password_verify n'utilise pas SQL
+    $password = $_POST['password'];
 
-    // Vérifier si l'utilisateur existe
     $result = mysqli_query($conn, "SELECT * FROM users WHERE email='$email'") or die(mysqli_error($conn));
     $row = mysqli_fetch_assoc($result);
 
     if ($row) { 
-        $motDePass = $row['motDePasse']; // Mot de passe haché depuis la base de données
-        // Comparer le mot de passe saisi avec le haché
-        if (password_verify($password, $motDePass)) {
+        if (password_verify($password, $row['motDePasse'])) {
             $_SESSION['id'] = $row['id'];
             $_SESSION['email'] = $row['email'];
-            $_SESSION['type'] = $row['type']; 
+            $_SESSION['type'] = $row['type'];
 
-            // Redirection selon le type d'utilisateur
+            if (isset($_POST['remember_me'])) {
+                $cookie_value = base64_encode($row['id']);
+                setcookie("remember_me", $cookie_value, time() + (86400 * 30), "/");
+            }
+
+            // Redirections selon le type d'utilisateur
             if ($row['type'] === 'admin') {
                 header("Location: admin_page.php");
             } elseif ($row['type'] === 'vendeur') {
                 header("Location: vendeur_page.php");
             } elseif ($row['type'] === 'fournisseur') {
-                $_SESSION['fournisseur_id'] = $row['id']; // Ajoutez cette ligne pour définir la session du fournisseur
                 header("Location: fournisseur_header.php");
             } else {
                 header("Location: home.php");
             }
             exit();
         } else {
-            echo "<div class='alert alert-danger'>
-                    <p>Adresse e-mail ou mot de passe incorrect</p>
-                  </div>";
+            $error = "Adresse e-mail ou mot de passe incorrect";
         }
     } else {
-        echo "<div class='alert alert-danger'>
-                <p>Adresse e-mail ou mot de passe incorrect</p>
-              </div>";
+        $error = "Adresse e-mail ou mot de passe incorrect";
     }
 }
 ?>
@@ -49,190 +46,11 @@ if (isset($_POST['submit'])) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ParfumPlanet</title>
-   
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-  body {
-            background: linear-gradient(135deg, rgba(5, 54, 95, 0.8), rgba(255, 77, 136, 0.8)),
-                        url('login_pic.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Poppins', sans-serif;
-        }
-
-
-.container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-}
-
-.card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    box-shadow: 0px 10px 30px rgba(180, 65, 65, 0.3);
-    padding: 30px;
-    max-width: 400px;
-    width: 100%;
-    color: white;
-    text-align: center;
-}
-
-.gradient-title {
-    background-image: linear-gradient(to right,rgb(63, 160, 79), #2BD2FF, #2BFF88);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    font-weight: bold;
-}
-
-.form-label {
-    color: white;
-    font-weight: 500;
-}
-
-.form-control {
-    background: rgba(94, 17, 17, 0.2);
-    border: none;
-    border-radius: 10px;
-    color: white;
-    padding: 12px;
-}
-
-.form-control::placeholder {
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.btn-primary {
-    background: linear-gradient(to right,rgb(112, 79, 87), #FF4B2B);
-    border: none;
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 25px;
-    transition: 0.3s;
-}
-
-.btn-primary:hover {
-    opacity: 0.8;
-    transform: scale(1.05);
-}
-
-.text-center a {
-    color: #FF8C00;
-    font-weight: 500;
-    text-decoration: none;
-    transition: 0.3s;
-}
-
-.text-center a:hover {
-    text-decoration: underline;
-}
-
-    </style>
-</head>
-
-<body class="bg-light d-flex align-items-center justify-content-center min-vh-100">
-    <div class="container">
-        <div class="card mx-auto p-4 custom-form">
-            <div class="card-body">
-            <?php
-
-include("conn.php");
-
-// Vérifier si un cookie "remember_me" existe
-if (isset($_COOKIE['remember_me'])) {
-    $cookie_value = base64_decode($_COOKIE['remember_me']); // Décoder la valeur du cookie
-
-    // Vérifier si l'ID existe dans la base de données
-    $result = mysqli_query($conn, "SELECT * FROM users WHERE id='$cookie_value'") or die(mysqli_error($conn));
-    $row = mysqli_fetch_assoc($result);
-
-    if ($row) {
-        $_SESSION['id'] = $row['id'];
-        $_SESSION['email'] = $row['email'];
-        $_SESSION['type'] = $row['type'];
-
-        // Redirection selon le type d'utilisateur
-        if ($row['type'] === 'admin') {
-            header("Location: admin_page.php");
-        } elseif ($row['type'] === 'vendeur') {
-            header("Location: vendeur_page.php");
-        } else {
-            header("Location: home.php");
-        }
-        exit();
-    } else {
-        // Si l'utilisateur n'existe pas, détruire le cookie
-        setcookie("remember_me", "", time() - 3600, "/");
-    }
-}
-
-if (isset($_POST['submit'])) {
-    $email = mysqli_real_escape_string($conn, $_POST['email']);
-    $password = $_POST['password'];
-
-    // Vérifier si l'utilisateur existe
-    $result = mysqli_query($conn, "SELECT * FROM users WHERE email='$email'") or die(mysqli_error($conn));
-    $row = mysqli_fetch_assoc($result);
-
-    if ($row) {
-        $motDePass = $row['motDePasse']; // Mot de passe haché
-        // Comparer le mot de passe saisi avec le haché
-        if (password_verify($password, $motDePass)) {
-            $_SESSION['id'] = $row['id'];
-            $_SESSION['email'] = $row['email'];
-            $_SESSION['type'] = $row['type'];
-
-            // Créer un cookie pour garder l'utilisateur connecté
-            if (isset($_POST['remember_me'])) {
-                $cookie_value = base64_encode($row['id']); // Encode l'ID de l'utilisateur
-                setcookie("remember_me", $cookie_value, time() + (86400 * 30), "/"); // Expiration après 30 jours
-            }
-
-            // Redirection selon le type d'utilisateur
-            if ($row['type'] === 'admin') {
-                header("Location: admin_page.php");
-           }
-                
-            elseif($row['type'] === 'fournisseur'){
-                header("Location: fournisseur.php");
-             } else {
-                header("Location: home.php");
-            }
-            exit();
-        } else {
-            echo "<div class='alert alert-danger'>
-                    <p>Adresse e-mail ou mot de passe incorrect</p>
-                  </div>";
-        }
-    } else {
-        echo "<div class='alert alert-danger'>
-                <p>Adresse e-mail ou mot de passe incorrect</p>
-              </div>";
-    }
-}
-?>
-
-<!DOCTYPE html>
-<html lang="fr">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ParfumPlanet</title>
+    <title>Connexion - Bloom Parfums</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #05365f, #ff4d88);
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -241,84 +59,102 @@ if (isset($_POST['submit'])) {
         }
 
         .card {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
+            background: white;
+            border: none;
             border-radius: 12px;
             padding: 40px;
-            max-width: 380px;
+            max-width: 400px;
             width: 100%;
-            color: white;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            color: #333;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .gradient-title {
-            background-image: linear-gradient(to right, #ff9f00, #ff4d88);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .login-title {
+            text-align: center;
             font-weight: 600;
-            font-size: 30px;
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #333;
         }
 
         .form-label {
-            color: #f8f9fa;
+            color: #333;
             font-weight: 500;
         }
 
         .form-control {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 10px;
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
             padding: 14px;
-            color: white;
+            color: #333;
             margin-bottom: 20px;
         }
 
+        .form-control:focus {
+            border-color: #9c27b0;
+            box-shadow: 0 0 0 0.2rem rgba(156, 39, 176, 0.25);
+        }
+
         .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: #999;
         }
 
         .btn-primary {
-            background: linear-gradient(to right, #ff9f00, #ff4d88);
+            background: #9c27b0;
             border: none;
             padding: 12px 20px;
             font-size: 16px;
-            border-radius: 25px;
+            border-radius: 8px;
             width: 100%;
             transition: 0.3s;
         }
 
         .btn-primary:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
+            background: #7b1fa2;
+            transform: translateY(-2px);
         }
 
         .text-center a {
-            color: #ff9f00;
+            color: #9c27b0;
             font-weight: 500;
             text-decoration: none;
             transition: 0.3s;
         }
 
         .text-center a:hover {
+            color: #7b1fa2;
             text-decoration: underline;
         }
 
         .alert {
-            background-color: rgba(255, 0, 0, 0.6);
-            color: white;
-            font-weight: 600;
+            background-color: #f8d7da;
+            color: #721c24;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-weight: 500;
         }
 
         .form-check-label {
-            color: #f8f9fa;
+            color: #555;
+        }
+
+        .form-check-input:checked {
+            background-color: #9c27b0;
+            border-color: #9c27b0;
         }
     </style>
 </head>
 
 <body>
     <div class="card">
-        <h1 class="text-center gradient-title">Connexion</h1>
+        <h1 class="login-title">Connexion</h1>
+        
+        <?php if (!empty($error)) : ?>
+            <div class="alert"><?php echo $error; ?></div>
+        <?php endif; ?>
+
         <form action="" method="post">
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
@@ -330,7 +166,6 @@ if (isset($_POST['submit'])) {
                 <input type="password" name="password" id="password" class="form-control" placeholder="Entrez votre mot de passe" autocomplete="off" required>
             </div>
 
-            <!-- Case à cocher pour se souvenir de l'utilisateur -->
             <div class="mb-3 form-check">
                 <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
                 <label class="form-check-label" for="remember_me">Se souvenir de moi</label>
@@ -345,7 +180,7 @@ if (isset($_POST['submit'])) {
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

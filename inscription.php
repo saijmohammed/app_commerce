@@ -2,10 +2,12 @@
 session_start();
 include("conn.php");
 
+// Variables pour les erreurs et messages
 $usernameErr = $emailErr = "";
 $successMessage = "";
 
-if (isset($_POST['submit'])) {
+// Traitement de l'inscription
+if (isset($_POST['register'])) {
     $nom_utilisateur = $_POST['username'];
     $email = $_POST['email'];
     $motDePasse = password_hash($_POST['password'], PASSWORD_DEFAULT);
@@ -13,11 +15,13 @@ if (isset($_POST['submit'])) {
     $numero_telephone = $_POST['numero_telephone'];
     $type = 'user';
 
+    // Validation du nom d'utilisateur
     $resultUsername = mysqli_query($conn, "SELECT * FROM users WHERE Username='$nom_utilisateur'");
     if (mysqli_num_rows($resultUsername) > 0) {
         $usernameErr = "Le nom d'utilisateur existe déjà.";
     }
 
+    // Validation de l'email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $emailErr = "Format d'e-mail invalide.";
     } else {
@@ -27,6 +31,7 @@ if (isset($_POST['submit'])) {
         }
     }
 
+    // Si pas d'erreurs, insertion dans la base
     if (empty($usernameErr) && empty($emailErr)) {
         mysqli_query($conn, "INSERT INTO users(Username, numero_telephone, adresse, email, motDePasse, type) 
             VALUES('$nom_utilisateur','$numero_telephone','$adresse','$email','$motDePasse','$type')") or die("Erreur");
@@ -42,123 +47,135 @@ if (isset($_POST['submit'])) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription - ParfumPlanet</title>
+    <title>Inscription - Bloom Parfums</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
         body {
-            background: linear-gradient(135deg, #05365f, #ff4d88);
+            background: url('login_pic.jpg') no-repeat center center fixed;
+            background-size: cover;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Poppins', sans-serif;
+            margin: 0;
         }
 
         .card {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
+            background: white;
             border-radius: 12px;
-            padding: 20px;
-            max-width: 350px;
-            width: 80%;
-            color: white;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            color: #333;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .gradient-title {
-            background-image: linear-gradient(to right, #ff9f00,rgb(238, 87, 137));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .title {
+            text-align: center;
+            font-size: 28px;
             font-weight: 600;
-            font-size: 30px;
+            margin-bottom: 25px;
+            color: #6a11cb;
         }
 
         .form-label {
-            color: #f8f9fa;
-            font-weight: 150;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
         }
 
         .form-control {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            border-radius: 10px;
-            padding: 10px;
-            color: white;
-            margin-bottom: 5px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px 15px;
+            color: #333;
+            margin-bottom: 15px;
         }
 
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+        .form-control:focus {
+            border-color: #9c27b0;
+            box-shadow: 0 0 0 0.2rem rgba(156, 39, 176, 0.25);
         }
 
-        .btn-primary {
-            background: linear-gradient(to right, #ff9f00, #ff4d88);
+        .btn-register {
+            background: #9c27b0;
             border: none;
-            padding: 12px 20px;
+            padding: 12px;
             font-size: 16px;
-            border-radius: 25px;
+            border-radius: 8px;
             width: 100%;
-            transition: 0.3s;
+            color: white;
+            font-weight: 500;
+            transition: all 0.3s;
         }
 
-        .btn-primary:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
+        .btn-register:hover {
+            background: #7b1fa2;
+            transform: translateY(-2px);
         }
 
-        .text-center a {
-            color: #ff9f00;
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .login-link a {
+            color: #9c27b0;
             font-weight: 500;
             text-decoration: none;
-            transition: 0.3s;
         }
 
-        .text-center a:hover {
+        .login-link a:hover {
             text-decoration: underline;
         }
 
         .error-message {
-            color: #ff8080;
-            font-size: 0.9em;
-            margin-bottom: 10px;
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: -10px;
+            margin-bottom: 15px;
         }
 
         .alert-success {
-            background-color: rgba(0, 255, 100, 0.2);
-            color: #00ff99;
-            font-weight: 600;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
         }
     </style>
 </head>
 
 <body>
     <div class="card">
-        <h1 class="text-center gradient-title">Inscription</h1>
+        <h1 class="title">Inscription</h1>
 
         <?php if (!empty($successMessage)) : ?>
-            <div class="alert alert-success text-center"><?php echo $successMessage; ?></div>
+            <div class="alert-success"><?php echo $successMessage; ?></div>
         <?php endif; ?>
 
         <form action="" method="post">
-            <div class="mb-2">
+            <div class="mb-3">
                 <label class="form-label" for="username">Nom d'utilisateur</label>
                 <input type="text" name="username" id="username" class="form-control" placeholder="Nom d'utilisateur" required>
                 <div class="error-message"><?php echo $usernameErr; ?></div>
             </div>
 
-            <div class="mb-2">
+            <div class="mb-3">
                 <label class="form-label" for="adresse">Adresse</label>
                 <input type="text" name="adresse" id="adresse" class="form-control" placeholder="Adresse" required>
             </div>
 
-            <div class="mb-2">
+            <div class="mb-3">
                 <label class="form-label" for="numero_telephone">Numéro de téléphone</label>
                 <input type="text" name="numero_telephone" id="numero_telephone" class="form-control" value="212" required>
             </div>
 
-            <div class="mb-2">
+            <div class="mb-3">
                 <label class="form-label" for="email">E-mail</label>
                 <input type="text" name="email" id="email" class="form-control" placeholder="Adresse e-mail" required>
                 <div class="error-message"><?php echo $emailErr; ?></div>
@@ -169,15 +186,15 @@ if (isset($_POST['submit'])) {
                 <input type="password" name="password" id="password" class="form-control" placeholder="Mot de passe" required>
             </div>
 
-            <button type="submit" class="btn btn-primary" name="submit">S'inscrire</button>
+            <button type="submit" class="btn btn-register" name="register">S'inscrire</button>
 
-            <div class="text-center mt-3">
+            <div class="login-link">
                 <p>Déjà inscrit ? <a href="login.php">Se connecter</a></p>
             </div>
         </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
